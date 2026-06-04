@@ -7,7 +7,7 @@ This should be universal with rollup-plugin-web-worker-loader apart from the cha
 
 ```ts
 import { defineConfig } from "vite";
-import vitePluginAudioWorklet from "vite-plugin-audio-worklet";
+import { vitePluginAudioWorklet } from "vite-plugin-audio-worklet";
 
 export default defineConfig({
   plugins: [
