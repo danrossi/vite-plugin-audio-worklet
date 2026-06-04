@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "preserve",
+    "target": "esnext",
+    "useDefineForClassFields": false,
+    "resolveJsonModule": true,
+    "rootDir": "./src",
+    "types": ["vite/client"],
+  },
+  "include": [
+    "./src/**/*.ts",
+  ],
+  "exclude": [
+    "node_modules/*",
+    "./examples/*"
+  ]
+}
