@@ -44,4 +44,4 @@ function n() {
 	};
 }
 //#endregion
-export { n as workletInline };
+export { n as vitePluginAudioWorklet };
