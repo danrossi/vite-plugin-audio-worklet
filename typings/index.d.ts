@@ -1,2 +1,2 @@
 import type { Plugin } from "vite";
-export declare function workletInline(): Plugin;
+export declare function vitePluginAudioWorklet(): Plugin;

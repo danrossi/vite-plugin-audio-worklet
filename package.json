@@ -19,7 +19,7 @@
   "scripts": {
     "dev": "vite build --mode development",
     "build": "vite build",
-    "dts": "tsc src/*.ts --emitDeclarationOnly --declaration --declarationDir ./typings"
+    "dts": "tsc --emitDeclarationOnly --declaration --declarationDir ./typings"
   },
   "author": " <danielr@electroteque.org> (https://github.com/danielr)",
   "license": "MIT",
