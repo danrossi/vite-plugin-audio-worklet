@@ -54,3 +54,14 @@ class AudioWorklet extends AudioWorkletNode {
 await registerWorklet(audioContext);
 const worklet = new AudioWorklet(audioContext);
 ```
+
+### Audio Worklet Module
+
+Include the `worklet.d.ts` typings into the typescript config to recognise the audioworklet source
+
+```
+"include": [
+    "src",
+    "./node_modules/vite-plugin-audio-worklet/typings/worklet.d.ts",
+  ]
+  ```
