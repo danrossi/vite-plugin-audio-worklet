@@ -1,47 +1,65 @@
 import { rolldown as e } from "rolldown";
 //#region src/index.ts
 var t = "?audioworklet";
-function n() {
-	let n = "";
-	return {
-		name: "worklet-inline",
-		enforce: "pre",
-		configResolved(e) {
-			n = e.mode;
-		},
-		async resolveId(e, n) {
-			if (!e.endsWith(t)) return;
-			let r = e.slice(0, -13), i = await this.resolve(r, n, { skipSelf: !0 });
-			if (i) return {
-				id: i.id + t,
-				moduleSideEffects: !1
-			};
-		},
-		async load(r) {
-			if (!r.endsWith(t)) return;
-			let i = r.slice(0, -13);
-			this.addWatchFile && this.addWatchFile(i);
-			let a = (await (await e({ input: i })).generate({
-				format: "esm",
-				minify: n !== "dev"
-			})).output.filter((e) => e.type === "chunk").map((e) => e.code).join("");
-			return {
-				code: `
+function n(e) {
+	return `
+		const code = ${JSON.stringify(e)};
+		const blob = new Blob([code], { type: "application/javascript" });
+	`;
+}
+function r(e) {
+	return `
 				let workletLoadedPromise = null;
 				export default async function createAudioWorkletFactory(audioContext, options) {
 					if (!workletLoadedPromise) {
-						const code = ${JSON.stringify(a)};
-						const blob = new Blob([code], { type: "application/javascript" });
+						${n(e)};
 						workletLoadedPromise = audioContext.audioWorklet.addModule(URL.createObjectURL(blob), options);
 					}
 					
 					return workletLoadedPromise;
 					
-			}`,
+			}`;
+}
+function i(e) {
+	return `
+			${n(e)};
+			export default URL.createObjectURL(blob);
+		`;
+}
+function a(n) {
+	let a = n && n.suffix || t, o = n && n.blobURL;
+	return {
+		name: "worklet-inline",
+		enforce: "pre",
+		configResolved(e) {
+			e.mode;
+		},
+		async resolveId(e, t) {
+			if (!e.endsWith(a)) return;
+			let n = e.slice(0, -a.length), r = await this.resolve(n, t, { skipSelf: !0 });
+			if (r) return {
+				id: r.id + a,
+				moduleSideEffects: !1
+			};
+		},
+		async load(t) {
+			if (!t.endsWith(a)) return;
+			let n = t.slice(0, -a.length);
+			this.addWatchFile && this.addWatchFile(n);
+			let s = (await (await e({
+				input: n,
+				experimental: { attachDebugInfo: "none" }
+			})).generate({
+				format: "esm",
+				minify: !0,
+				comments: !1
+			})).output.filter((e) => e.type === "chunk").map((e) => e.code).join("");
+			return {
+				code: o ? i(s) : r(s),
 				map: null
 			};
 		}
 	};
 }
 //#endregion
-export { n as vitePluginAudioWorklet };
+export { a as vitePluginAudioWorklet };

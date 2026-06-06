@@ -16,6 +16,7 @@ import { rolldown } from 'rolldown';
 
 import type { Plugin } from "vite";
 
+
 const SUFFIX = "?audioworklet";
 
 export interface AudioWorkletPluginConfig {
@@ -88,12 +89,15 @@ export function vitePluginAudioWorklet(config?: AudioWorkletPluginConfig): Plugi
 
 			const bundle = await rolldown({
 				input: filePath,
-				
+				experimental: {
+					attachDebugInfo: 'none',
+				}
 			});
 
 			const result = await bundle.generate({
 				format: 'esm',
-				minify: mode !== 'dev'
+				minify: true,
+				comments: false
 			});
 
 			const compiled = result.output.filter(chunk => chunk.type ==="chunk").map(chunk => chunk.code).join("");
