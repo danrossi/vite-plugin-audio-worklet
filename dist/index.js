@@ -27,37 +27,42 @@ function i(e) {
 		`;
 }
 function a(n) {
-	let a = n && n.suffix || t, o = n && n.blobURL;
+	let a = n && n.suffix || t, o = n && n.blobURL, s, c = RegExp(`\\${a}$`);
 	return {
 		name: "worklet-inline",
 		enforce: "pre",
 		configResolved(e) {
-			e.mode;
+			s = e;
 		},
-		async resolveId(e, t) {
-			if (!e.endsWith(a)) return;
-			let n = e.slice(0, -a.length), r = await this.resolve(n, t, { skipSelf: !0 });
-			if (r) return {
-				id: r.id + a,
-				moduleSideEffects: !1
-			};
+		resolveId: {
+			filter: { id: c },
+			async handler(e, t, n) {
+				let r = e.slice(0, -a.length), i = await this.resolve(r, t, { skipSelf: !0 });
+				if (i) return {
+					id: i.id + a,
+					moduleSideEffects: !1
+				};
+			}
 		},
-		async load(t) {
-			if (!t.endsWith(a)) return;
-			let n = t.slice(0, -a.length);
-			this.addWatchFile && this.addWatchFile(n);
-			let s = (await (await e({
-				input: n,
-				experimental: { attachDebugInfo: "none" }
-			})).generate({
-				format: "esm",
-				minify: !0,
-				comments: !1
-			})).output.filter((e) => e.type === "chunk").map((e) => e.code).join("");
-			return {
-				code: o ? i(s) : r(s),
-				map: null
-			};
+		load: {
+			filter: { id: c },
+			async handler(t) {
+				let n = t.slice(0, -a.length);
+				this.addWatchFile && this.addWatchFile(n);
+				let c = (await (await e({
+					...s.build.rolldownOptions,
+					input: n,
+					experimental: { attachDebugInfo: "none" }
+				})).generate({
+					format: "esm",
+					minify: !0,
+					comments: !1
+				})).output.filter((e) => e.type === "chunk").map((e) => e.code).join("");
+				return {
+					code: o ? i(c) : r(c),
+					map: null
+				};
+			}
 		}
 	};
 }
