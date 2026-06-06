@@ -1,5 +1,7 @@
+export type AudioWorkletFactory = (audioContext: AudioContext) => Promise<void>;
+
 declare module "*?audioworklet" {
-	const registerMethodOrBlobURL: ((audioContext: AudioContext) => Promise<void>) | string;
+	const registerMethodOrBlobURL: AudioWorkletFactory | string;
 	export default registerMethodOrBlobURL;
 }
 
