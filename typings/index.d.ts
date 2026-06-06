@@ -1,2 +1,6 @@
 import type { Plugin } from "vite";
-export declare function vitePluginAudioWorklet(): Plugin;
+export interface AudioWorkletPluginConfig {
+    suffix?: string;
+    blobURL?: boolean;
+}
+export declare function vitePluginAudioWorklet(config?: AudioWorkletPluginConfig): Plugin;

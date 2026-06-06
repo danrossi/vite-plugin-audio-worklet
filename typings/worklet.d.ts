@@ -1,4 +1,9 @@
 declare module "*?audioworklet" {
-	const registerMethod: (audioContext: AudioContext) => Promise<void>;
-	export default registerMethod;
+	const registerMethodOrBlobURL: (audioContext: AudioContext) => Promise<void> | string;
+	export default registerMethodOrBlobURL;
+}
+
+declare module "*?worklet" {
+	const url: string;
+	export default url;
 }

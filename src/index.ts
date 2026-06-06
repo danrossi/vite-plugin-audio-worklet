@@ -18,9 +18,48 @@ import type { Plugin } from "vite";
 
 const SUFFIX = "?audioworklet";
 
+export interface AudioWorkletPluginConfig {
+	//customise the suffix
+	suffix?: string;
+	//return blob url instead of factory method
+	blobURL?: boolean;
+}
 
-export function vitePluginAudioWorklet(): Plugin {
+function generateWorkletBlob(compiled: string) {
+	return `
+		const code = ${JSON.stringify(compiled)};
+		const blob = new Blob([code], { type: "application/javascript" });
+	`;
+}
+
+function generateWorkletFactory(compiled: string) {
+	return `
+				let workletLoadedPromise = null;
+				export default async function createAudioWorkletFactory(audioContext, options) {
+					if (!workletLoadedPromise) {
+						${generateWorkletBlob(compiled)};
+						workletLoadedPromise = audioContext.audioWorklet.addModule(URL.createObjectURL(blob), options);
+					}
+					
+					return workletLoadedPromise;
+					
+			}`
+}
+
+function generateWorkletURL(compiled: string) {
+	return `
+			${generateWorkletBlob(compiled)};
+			export default URL.createObjectURL(blob);
+		`;
+}
+
+
+export function vitePluginAudioWorklet(config?: AudioWorkletPluginConfig): Plugin {
 	let mode = '';
+	let suffix = config && config.suffix || SUFFIX;
+	//use the blob url string if set
+	let useBlobURL = config && config.blobURL;
+
 	return {
 		name: "worklet-inline",
 		enforce: "pre",
@@ -29,19 +68,19 @@ export function vitePluginAudioWorklet(): Plugin {
 			mode = resolvedConfig.mode 
 		},
 		async resolveId(source, importer) {
-			if (!source.endsWith(SUFFIX)) return;
+			if (!source.endsWith(suffix)) return;
 
-			const cleanSource = source.slice(0, -SUFFIX.length);
+			const cleanSource = source.slice(0, -suffix.length);
 			const resolved = await this.resolve(cleanSource, importer, { skipSelf: true });
 			if (!resolved) return;
 
-			return { id: resolved.id + SUFFIX, moduleSideEffects: false };
+			return { id: resolved.id + suffix, moduleSideEffects: false };
 		},
 
 		async load(id) {
-			if (!id.endsWith(SUFFIX)) return;
+			if (!id.endsWith(suffix)) return;
 
-			const filePath = id.slice(0, -SUFFIX.length);
+			const filePath = id.slice(0, -suffix.length);
 
 			if (this.addWatchFile) {
 				this.addWatchFile(filePath);
@@ -59,19 +98,10 @@ export function vitePluginAudioWorklet(): Plugin {
 
 			const compiled = result.output.filter(chunk => chunk.type ==="chunk").map(chunk => chunk.code).join("");
 
-			const generatedCode = `
-				let workletLoadedPromise = null;
-				export default async function createAudioWorkletFactory(audioContext, options) {
-					if (!workletLoadedPromise) {
-						const code = ${JSON.stringify(compiled)};
-						const blob = new Blob([code], { type: "application/javascript" });
-						workletLoadedPromise = audioContext.audioWorklet.addModule(URL.createObjectURL(blob), options);
-					}
-					
-					return workletLoadedPromise;
-					
-			}`;
+			//return a blob url string if set or return a factory method
+			const generatedCode = useBlobURL ? generateWorkletURL(compiled) : generateWorkletFactory(compiled);
 
+			
 			return {
 				code: generatedCode,
 				map: null
