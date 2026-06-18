@@ -11,10 +11,10 @@ function r(e) {
 	return `
 				let workletLoadedPromise = null;
 				export default async function createAudioWorkletFactory(audioContext, options) {
-					if (!workletLoadedPromise) {
+					try {
 						${n(e)};
 						workletLoadedPromise = audioContext.audioWorklet.addModule(URL.createObjectURL(blob), options);
-					}
+					} catch (e) {}
 					
 					return workletLoadedPromise;
 					

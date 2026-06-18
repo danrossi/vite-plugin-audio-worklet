@@ -36,10 +36,10 @@ function generateWorkletFactory(compiled: string) {
 	return `
 				let workletLoadedPromise = null;
 				export default async function createAudioWorkletFactory(audioContext, options) {
-					if (!workletLoadedPromise) {
+					try {
 						${generateWorkletBlob(compiled)};
 						workletLoadedPromise = audioContext.audioWorklet.addModule(URL.createObjectURL(blob), options);
-					}
+					} catch (e) {}
 					
 					return workletLoadedPromise;
 					
